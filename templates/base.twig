@@ -12,7 +12,15 @@
   </head>
   <body>
     {% include 'section/navigation.twig' %}
-   {% block body %} {% endblock%}
+    <div class="container">
+      {% block body %} {% endblock%}
+    </div>
+    <footer class="footer bg-light p-3 mt-3">
+      <div class="container text-center">
+        <span class="text-muted">copyright {{"now"|date('Y') }} Фаниль Хущамов</span>
+      </div>
+    </footer>
+
 
 </div>
     

@@ -5,11 +5,12 @@ use Slim\Factory\AppFactory;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Blog\PostMapper;
-
+use Blog\Slim\TwigMiddleware;
 require __DIR__ . '/vendor/autoload.php';
 
 $loader = new FilesystemLoader('templates');
 $view = new Environment($loader);
+
 
 $config = include 'config/database.php';
 $dsn = $config['dsn'];
@@ -28,6 +29,8 @@ try {
 //Create app
 $app = AppFactory::create();
 
+$app -> add(new TwigMiddleware($view));
+
 
 $app->get('/', function (Request $request, Response $response) use ($view, $connection) {
     $latestPosts = new \Blog\LatestPosts($connection);
@@ -42,6 +45,18 @@ $app->get('/', function (Request $request, Response $response) use ($view, $conn
 $app->get('/about', function (Request $request, Response $response) use ($view) {
     $body = $view -> render('about.twig', [
         'name' => 'Fanil'
+    ]);
+    $response->getBody()->write($body);
+    return $response;
+});
+$app->get('/blog[/{page}]', function (Request $request, Response $response, $args) use ($view, $connection) {
+    $latestPosts = new PostMapper($connection);
+    $page = isset($args['page']) ? (int) $args['page'] : 1;
+    $limit = 2;
+
+    $posts = $latestPosts->getList($page, $limit, 'DESC');
+    $body = $view -> render('blog.twig', [
+        'posts' => $posts
     ]);
     $response->getBody()->write($body);
     return $response;
